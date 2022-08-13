@@ -1,5 +1,5 @@
 from json import load
-from turtle import color
+from turtle import color, onclick
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -45,7 +45,7 @@ def get_data( filepath ):
 
 @st.cache(allow_output_mutation=True)
 def data_transform(data):
-    # Convertendo variáável date de object para datetime
+    # Convertendo variável date de object para datetime
     data['date'] = pd.to_datetime(data['date'])
 
     # Convertendo variáveis do tipo numérico para categórico
@@ -82,7 +82,7 @@ def plot_bar_chart(df, col1, col2):
     df_plot = df[[col1, col2]].groupby(col1).mean()
 
     # data plot
-    fig = px.bar( x=df_plot.index, y=df_plot['price'], title='Qtd. de Imóveis por Faixa de Preço', labels={
+    fig = px.bar( x=df_plot.index, y=df_plot['price'], title='Preço médio x Grade', labels={
         'y': 'Preço médio (USD)',
         'x': 'Grade'
     }, height=290 )
@@ -202,13 +202,47 @@ def display_home_page(df, geofile):
 
         price_density_maps(df, geofile)
 
-        with st.expander("Visualizar dataframe com TODOS os imóveis do portfólio."):
-            # st.write("""
-            #    Visualizando dataframe com TODOS os imóveis do portfólio da House Rocket.
-            #""")
-            st.dataframe(df)
+        st.header( 'Relatórios de Negócio' )
+        tab1, tab2 = st.tabs(["Relatório #1", "Relatório #2"])
+
+        with tab1:
+            df_rep1 = pd.read_csv('report1.csv', index_col=0)
+            with st.expander("Visualizar dataframe dos imóveis RECOMENDADOS PARA COMPRA.", expanded=True):
+                st.subheader("Relatório 1: Quais os imóveis que a House Rocket deveria comprar e por qual preço?")
+                c1, c2, c3 = st.columns((2, 2, 1))
+
+                c1.dataframe(df_rep1)
+
+                with c3:
+                    st.button('Download .csv', key=1, on_click=download_report(df_rep1, 'csv', 1))
+                    st.button('Download .xlsx', key=2, on_click=download_report(df_rep1, 'xlsx', 1))
+                    st.button('Download .json', key=3, on_click=download_report(df_rep1, 'json', 1))
+
+        with tab2:
+            df_rep2 = pd.read_csv('report2.csv', index_col=0)
+            with st.expander("Visualizar dataframe dos imóveis RECOMENDADOS PARA VENDA.", expanded=True):
+                st.subheader("Relatório 2: Uma vez comprados, quando será a melhor época para revender e por qual preço?")
+                c1, c2, c3 = st.columns((2, 2, 1))
+
+                c1.dataframe(df_rep2)
+                
+                with c3:
+                    st.button('Download .csv', key=4, on_click=download_report(df_rep2, 'csv', 2))
+                    st.button('Download .xlsx', key=5, on_click=download_report(df_rep2, 'xlsx', 2))
+                    st.button('Download .json', key=6, on_click=download_report(df_rep2, 'json', 2))
+                    
 
     return None
+
+def download_report(df, type, report):
+    if type == 'csv':
+        df.to_csv(f'report{report}.csv')
+    elif type == 'xlsx':
+        df.to_pickle(f'report{report}.xlsx')
+    elif type == 'json':
+        df.to_pickle(f'report{report}.xlsx')
+
+    return False
         
 
 def display_insights_page(data):
@@ -253,21 +287,6 @@ def main():
     display_home_page(data, geofile)
     display_insights_page(data)
     display_results_page(data)
-
-    st.header( 'Relatórios de Negócio' )
-    tab1, tab2, tab3 = st.tabs(["Cat", "Dog", "Owl"])
-
-    with tab1:
-        st.header("A cat")
-        st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
-
-    with tab2:
-        st.header("A dog")
-        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
-
-    with tab3:
-        st.header("An owl")
-        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
 
 
 if __name__ == "__main__":
