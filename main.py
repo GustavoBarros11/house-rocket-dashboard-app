@@ -45,6 +45,8 @@ def get_data( filepath ):
 
 @st.cache(allow_output_mutation=True)
 def data_transform(df):
+
+    # criando variável metro quadrado
     df['valor_m2'] = df.apply(lambda x: x['price']/x['sqft_lot'], axis=1)
 
 def plot_distribution_of_variable(df, col):
@@ -56,24 +58,37 @@ def display_home_page(df):
     if selected == 'Página Inicial':
         st.sidebar.markdown('## Opções de Filtros:')
 
-        col1, col2, col3 = st.columns((1, 1, 3))
+        col1_1, col1_2, col1_3, col1_4 = st.columns(4)
         
-        with col1:
-            st.metric(label="Preço Médio dos Imóveis", value=f"${df['price'].mean():,.2f}")
+        col1_1.metric(label="Preço Médio dos Imóveis", value=f"${df['price'].mean():,.2f}")
 
-            st.metric(label="Preço Médio do M²", value=f"${df['valor_m2'].mean():,.2f}")
+        col1_2.metric(label="Preço Médio do M²", value=f"${df['valor_m2'].mean():,.2f}")
 
-        with col2:
-            st.metric(label="Total de Imóveis", value=df.shape[0], delta="100% dos imóveis")
-            st.metric(label="Recomendados para COMPRA", value=5808, delta=f'{(5808/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
+        col1_3.metric(label="Total de Imóveis", value=df.shape[0], delta="100% dos imóveis")
+        col1_4.metric(label="Recomendados para COMPRA", value=5808, delta=f'{(5808/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
 
-        with col3:
-            st.subheader('Imóveis por Faixa de Preço (qtd.)')
+        col2_1, col2_2 = st.columns(2)
+
+        with col2_1:
+            st.markdown('#### Qtd. de Imóveis por Faixa de Preço')
             plot_distribution_of_variable(df, 'price')
         
-        df_to_describe = df.describe().T.drop(columns=['count', '25%', '75%'], index=['id', 'lat', 'long', 'sqft_lot15', 'sqft_living15']).rename(columns={'index': 'Atributos', '50%': 'Mediana', 'max': 'Máx', 'min': 'Min', 'mean': 'Média', 'std':'Desvio Padrão'}).sort_index(axis=1)
-        st.dataframe(df_to_describe)
-        # st.dataframe(df.describe().round().T)
+        with col2_2:
+            st.markdown('#### Métricas de Resumo')
+            st.text('Variáveis numéricas')
+            df_to_describe = df.describe().T.drop(columns=['count', '25%', '75%'], \
+                index=['id', 'lat', 'long', 'sqft_lot15', 'sqft_living15', 'has_basement', \
+                    'grade', 'condition', 'view', 'waterfront', 'new_house']) \
+                    .rename(columns={
+                        'index': 'Atributos',
+                        '50%': 'Mediana', 
+                        'max': 'Máx', 
+                        'min': 'Min', 
+                        'mean': 'Média', 
+                        'std':'Desvio Padrão'
+                    }).sort_index(ascending=False, axis=1)
+            st.dataframe(df_to_describe, height=300)
+            st.text('Variáveis categóricas')
         
         with st.expander("Visualizar dataframe com TODOS os imóveis do portfólio."):
             # st.write("""
