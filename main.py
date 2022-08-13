@@ -37,86 +37,52 @@ with st.sidebar:
                     "menu-title": {"text-align": "center", "color": "#5c3934"}})
 
 # Read data
-@st.cache( allow_output_mutation=True )
+@st.cache(allow_output_mutation=True)
 def get_data( filepath ):
     data = pd.read_csv( filepath, index_col=0 )
 
     return data
 
-def display_home_page(data):
+@st.cache(allow_output_mutation=True)
+def data_transform(df):
+    df['valor_m2'] = df.apply(lambda x: x['price']/x['sqft_lot'], axis=1)
+
+def plot_distribution_of_variable(df, col):
+    # data plot
+    fig = px.histogram ( df, x=col )
+    st.plotly_chart( fig, use_container_width=True )
+
+def display_home_page(df):
     if selected == 'Página Inicial':
         st.sidebar.markdown('## Opções de Filtros:')
 
-        col1, col2 = st.columns((1, 3))
+        col1, col2, col3 = st.columns((1, 1, 3))
         
         with col1:
-            st.metric("Temperature", "70 °F", "1.2 °F")
+            st.metric(label="Preço Médio dos Imóveis", value=f"${df['price'].mean():,.2f}")
 
-            st.metric(label="Active developers", value=123, delta=123, delta_color="off")
-
-            st.metric(label="Gas price", value=4, delta=-0.5, delta_color="inverse")
-
-            st.metric(label="Active developers", value=123, delta=123, delta_color="off")
+            st.metric(label="Preço Médio do M²", value=f"${df['valor_m2'].mean():,.2f}")
 
         with col2:
-            st.pydeck_chart(pdk.Deck(
-                map_style=None,
-                initial_view_state=pdk.ViewState(
-                    latitude=47.721,
-                    longitude=-122.319,
-                    zoom=10,
-                    pitch=50,
-                ),
-                layers=[
-                    pdk.Layer(
-                        'HexagonLayer',
-                        data=data,
-                        get_position='[long, lat]',
-                        radius=200,
-                        elevation_scale=4,
-                        elevation_range=[0, 1000],
-                        pickable=True,
-                        extruded=True,
-                    ),
-                    #pdk.Layer(
-                    #    'ScatterplotLayer',
-                    #    data=data,
-                    #    get_position='[long, lat]',
-                    #    get_color='[200, 30, 0, 160]',
-                    #    get_radius='200',
-                    #),
-                ],
-            ))
-        #    draw_scatter_map(data)
+            st.metric(label="Total de Imóveis", value=df.shape[0], delta="100% dos imóveis")
+            st.metric(label="Recomendados para COMPRA", value=5808, delta=f'{(5808/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
 
+        with col3:
+            st.subheader('Imóveis por Faixa de Preço (qtd.)')
+            plot_distribution_of_variable(df, 'price')
+        
+        df_to_describe = df.describe().T.drop(columns=['count', '25%', '75%'], index=['id', 'lat', 'long', 'sqft_lot15', 'sqft_living15']).rename(columns={'index': 'Atributos', '50%': 'Mediana', 'max': 'Máx', 'min': 'Min', 'mean': 'Média', 'std':'Desvio Padrão'}).sort_index(axis=1)
+        st.dataframe(df_to_describe)
+        # st.dataframe(df.describe().round().T)
+        
         with st.expander("Visualizar dataframe com TODOS os imóveis do portfólio."):
             # st.write("""
             #    Visualizando dataframe com TODOS os imóveis do portfólio da House Rocket.
             #""")
-            st.dataframe(data)
-        # f_all = st.checkbox('Filtrar por imóveis recomendados', value=False)
-
-        # c1, c2, c3, c4 = st.columns(1, 1, 1, 1)
+            st.dataframe(df)
+        
 
     return None
-
-# def draw_scatter_map(df):
-#     fig = px.scatter_mapbox(
-#         df,
-#         lat='lat',
-#         lon='long',
-#         size='condition',
-#         color='price',
-#         color_continuous_scale=px.colors.cyclical.IceFire,
-#         size_max=7,
-#         zoom=10
-#     )
-
-#     fig.update_layout(mapbox_style='open-street-map')
-#     fig.update_layout(height=600, margin={"r": 0, "t": 0, "l": 0, "b": 0})
-#     st.plotly_chart(fig)
-
-#     return None
         
 
 def display_insights_page(data):
@@ -140,7 +106,7 @@ def main():
     data = get_data(filepath)
 
     # Transform
-
+    data_transform(data)
 
     # Load
 
