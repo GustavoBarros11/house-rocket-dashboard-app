@@ -1,11 +1,10 @@
-from multiprocessing.sharedctypes import Value
-from turtle import left
-import pandas as pd
+from json import load
+from turtle import color
 import numpy as np
+import pandas as pd
+import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
-import seaborn as sns
-import streamlit as st
 import folium
 import geopandas
 import pydeck as pdk
@@ -13,14 +12,11 @@ import pydeck as pdk
 from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 from streamlit_option_menu import option_menu
-from folium.plugins import MarkerCluster
 from PIL import Image
-from datetime import datetime
 
-st.set_page_config(layout='wide')
+st.set_page_config(layout='wide', page_title='Dashboard de Insights da House Rocket', page_icon=':thumbsup:')
 
 st.markdown("<h1 style='text-align: left; color: #5c3934;'><i>Dashboard de Insights da House Rocket</i></h1><hr>", unsafe_allow_html=True)
-#st.markdown(f"<span style='color: #5c3934;text-align: left;font-weight: normal;font-size: 1rem;'>{datetime.now().strftime('%d/%m/%Y')}</span><hr>", unsafe_allow_html=True)
 
 with st.sidebar:
     # Images used.
@@ -28,8 +24,8 @@ with st.sidebar:
     st.sidebar.image(sidebar_icon)
 
     selected = option_menu(menu_title="MENU PRINCIPAL",
-            options= ['Página Inicial', 'Insights Gerados', 'Resultados de Negócio'],
-            icons=['house','bar-chart', 'calendar2-check'],
+            options= ['Página Inicial', 'Insights Gerados', 'Resultados de Negócio', 'Análise de Imóvel'],
+            icons=['house','bar-chart', 'calendar2-check', 'list-ul'],
             menu_icon='cast',
             default_index = 0,
             orientation='vertical',
@@ -42,7 +38,7 @@ with st.sidebar:
 
 # Read data
 @st.cache( allow_output_mutation=True )
-def load_data( filepath ):
+def get_data( filepath ):
     data = pd.read_csv( filepath, index_col=0 )
 
     return data
@@ -51,10 +47,9 @@ def display_home_page(data):
     if selected == 'Página Inicial':
         st.sidebar.markdown('## Opções de Filtros:')
 
-        col1, col2, col3 = st.columns((1, 1, 2))
-        col1.metric(label="Gas price", value=4, delta=-0.5, delta_color="inverse")
+        col1, col2 = st.columns((1, 3))
         
-        with col2:
+        with col1:
             st.metric("Temperature", "70 °F", "1.2 °F")
 
             st.metric(label="Active developers", value=123, delta=123, delta_color="off")
@@ -63,14 +58,14 @@ def display_home_page(data):
 
             st.metric(label="Active developers", value=123, delta=123, delta_color="off")
 
-        with col3:
+        with col2:
             st.pydeck_chart(pdk.Deck(
                 map_style=None,
                 initial_view_state=pdk.ViewState(
                     latitude=47.721,
                     longitude=-122.319,
                     zoom=10,
-                    pitch=70,
+                    pitch=50,
                 ),
                 layers=[
                     pdk.Layer(
@@ -92,6 +87,7 @@ def display_home_page(data):
                     #),
                 ],
             ))
+        #    draw_scatter_map(data)
 
         with st.expander("Visualizar dataframe com TODOS os imóveis do portfólio."):
             # st.write("""
@@ -101,12 +97,26 @@ def display_home_page(data):
         # f_all = st.checkbox('Filtrar por imóveis recomendados', value=False)
 
         # c1, c2, c3, c4 = st.columns(1, 1, 1, 1)
-        
 
-
-
-    
     return None
+
+# def draw_scatter_map(df):
+#     fig = px.scatter_mapbox(
+#         df,
+#         lat='lat',
+#         lon='long',
+#         size='condition',
+#         color='price',
+#         color_continuous_scale=px.colors.cyclical.IceFire,
+#         size_max=7,
+#         zoom=10
+#     )
+
+#     fig.update_layout(mapbox_style='open-street-map')
+#     fig.update_layout(height=600, margin={"r": 0, "t": 0, "l": 0, "b": 0})
+#     st.plotly_chart(fig)
+
+#     return None
         
 
 def display_insights_page(data):
@@ -123,11 +133,11 @@ def display_results_page(data):
 
 def main():
     # Extract
-    filepath = 'kc_house_treated_data.csv'
+    filepath = 'resulting_data.csv'
     if st.sidebar.checkbox('Filtrar por imóveis recomendados'):
         filepath = 'report1.csv'
         
-    data = load_data(filepath)
+    data = get_data(filepath)
 
     # Transform
 
