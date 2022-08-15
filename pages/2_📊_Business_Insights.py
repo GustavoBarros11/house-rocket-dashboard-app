@@ -12,7 +12,6 @@ def get_data( filepath ):
 
     return data
 
-
 def main():
     st.set_page_config(layout='wide', page_title='Dashboard de Insights da House Rocket', page_icon=':thumbsup:')
 
@@ -108,7 +107,7 @@ def main():
     # Hyphotesis 07
     c7.subheader('H7) A variação média no preço dos imóveis entre as categorias da variável *condition*, indicam um acréscimo médio de 20% de uma para outra.')
     c7.write(':white_check_mark: Válida: Imóveis reformados apresentam um valor superior em média, o que impactaria a tomada de decisão sobre comprar imóveis reformados ou comprar impoveis e reformá-los.')
-    fig_h7 = px.scatter(data, x="condition", y="price", trendline="ols", labels={
+    fig_h7 = px.scatter(x=data["condition"].astype(int), y=data["price"], trendline="ols", labels={
         'price': 'Preço médio dos imóveis (USD)',
         'year': 'Ano'
     }, height=290 )

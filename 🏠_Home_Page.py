@@ -125,7 +125,7 @@ def display_home_page(df, geofile):
     col1_2.metric(label="Preço Médio do M²", value=f"${df['valor_m2'].mean():,.2f}")
 
     col1_3.metric(label="Total de Imóveis", value=df.shape[0], delta="100% dos imóveis")
-    col1_4.metric(label="Recomendados para COMPRA", value=5808, delta=f'{(5808/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
+    col1_4.metric(label="Recomendados para COMPRA", value=5767, delta=f'{(5767/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
 
     col2_1, col2_2 = st.columns(2)
 
