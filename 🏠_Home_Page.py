@@ -48,7 +48,7 @@ def get_geofile( url ):
 
 def plot_distribution_of_variable(df, col):
     # data plot
-    fig = px.histogram( df, x=col, title='Qtd. de Imóveis por Faixa de Preço', labels={
+    fig = px.histogram( df, x=col, title='Qtd. de Imóveis por Faixa de Preço', color_discrete_sequence=["#8d3941"], labels={
         'price': 'Preço do imóvel (USD)',
         'count': 'Total de Imóveis (Und)'
     }, height=290 )
@@ -59,7 +59,7 @@ def plot_bar_chart(df, col1, col2):
     df_plot = df[[col1, col2]].groupby(col1).mean()
 
     # data plot
-    fig = px.bar( x=df_plot.index, y=df_plot['price'], title='Preço médio x Grade', labels={
+    fig = px.bar( x=df_plot.index, y=df_plot['price'], title='Preço médio x Grade', color_discrete_sequence=["#8d3941"], labels={
         'y': 'Preço médio (USD)',
         'x': 'Grade'
     }, height=290 )
@@ -120,12 +120,12 @@ def price_density_maps( df, geofile ):
 def display_home_page(df, geofile):
     col1_1, col1_2, col1_3, col1_4 = st.columns(4)
     
-    col1_1.metric(label="Preço Médio dos Imóveis", value=f"${df['price'].mean():,.2f}")
+    col1_1.metric(label="Total de Imóveis", value=df.shape[0], delta="100% dos imóveis")
+    col1_2.metric(label="Recomendados para COMPRA", value=5767, delta=f'{(5767/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
 
-    col1_2.metric(label="Preço Médio do M²", value=f"${df['valor_m2'].mean():,.2f}")
+    col1_3.metric(label="Preço Médio dos Imóveis", value=f"${df['price'].mean():,.2f}")
 
-    col1_3.metric(label="Total de Imóveis", value=df.shape[0], delta="100% dos imóveis")
-    col1_4.metric(label="Recomendados para COMPRA", value=5767, delta=f'{(5767/df.shape[0])*100:.2f}% dos imóveis', delta_color="off")
+    col1_4.metric(label="Preço Médio do M²", value=f"${df['valor_m2'].mean():,.2f}")
 
     col2_1, col2_2 = st.columns(2)
 
@@ -141,7 +141,7 @@ def display_home_page(df, geofile):
             lon='long',
             color='price',
             size='valor_m2',
-            color_continuous_scale=px.colors.sequential.dense,
+            color_continuous_scale=px.colors.cyclical.IceFire,
             size_max=15,
             zoom=9.5 )
 
@@ -184,7 +184,7 @@ def display_home_page(df, geofile):
     tab1, tab2 = st.tabs(["Relatório #1", "Relatório #2"])
 
     with tab1:
-        df_rep1 = pd.read_csv('report1.csv', index_col=0)
+        df_rep1 = pd.read_csv('data/report1.csv', index_col=0)
         st.markdown("##### Visualizar dataframe dos imóveis RECOMENDADOS PARA COMPRA.")
         st.subheader("Relatório 1: Quais os imóveis que a House Rocket deveria comprar e por qual preço?")
         c1, c2, c3 = st.columns((2, 2, 1))
@@ -197,7 +197,7 @@ def display_home_page(df, geofile):
 
         with c2:
             # data plot
-            fig = px.bar(df_rep1_2[:10], x='zipcode', y='profit', title='Avg. Profit x Region', labels={
+            fig = px.bar(df_rep1_2[:10], x='zipcode', y='profit', title='Avg. Profit x Region', color_discrete_sequence=["#8d3941"], labels={
                 'profit': 'Avg. Profit (USD)',
                 'zipcode': 'Region'
             }, height=400 )
@@ -210,7 +210,7 @@ def display_home_page(df, geofile):
             st.button('Download .json', key=3, on_click=download_report(df_rep1, 'json', 1))
 
     with tab2:
-        df_rep2 = pd.read_csv('report2.csv', index_col=0)
+        df_rep2 = pd.read_csv('data/report2.csv', index_col=0)
         st.markdown("##### Visualizar dataframe dos imóveis RECOMENDADOS PARA VENDA.")
         st.subheader("Relatório 2: Uma vez comprados, quando será a melhor época para revender e por qual preço?")
         c1, c2, c3 = st.columns((2, 2, 1))
@@ -219,7 +219,7 @@ def display_home_page(df, geofile):
 
         with c2:
             # data plot
-            fig = px.bar(df_rep2, x='season', y='Buy Price', title='Avg. Buy Price x Season', labels={
+            fig = px.bar(df_rep2, x='season', y='Buy Price', title='Avg. Buy Price x Season', color_discrete_sequence=["#8d3941"], labels={
                 'y': 'Avg. Buy Price (USD)',
                 'x': 'Season'
             }, height=400 )
@@ -260,7 +260,7 @@ def main():
 
     # ETL
     ## Extract
-    filepath = 'recommended_houses.csv'
+    filepath = 'data/recommended_houses.csv'
         
     data = get_data(filepath)
 
@@ -313,6 +313,11 @@ def main():
         if st.checkbox('Only  houses with basement'):
             data = data.loc[data['has_basement'] == 1]
 
+        st.markdown('___')
+
+        st.markdown('# Sobre')
+        st.markdown('Construido por **Gustavo Barros**')
+        st.markdown('Se você quiser procurar por mais informações sobre este projeto ou entrar em contato comigo, consulte meu [Portfólio de Projetos](https://gustavobarros11.github.io/) ou [Github](https://github.com/GustavoBarros11).')
         st.markdown('___')
 
     # Criando Páginas do Dashboard

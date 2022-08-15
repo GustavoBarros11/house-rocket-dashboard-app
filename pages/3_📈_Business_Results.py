@@ -1,14 +1,15 @@
-from string import hexdigits
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+
+from datetime import datetime
 
 from PIL import Image
 
 # Read data
 @st.cache(allow_output_mutation=True)
 def get_data( filepath ):
-    data = pd.read_csv( filepath, index_col=0 )
+    data = pd.read_csv( filepath, index_col=0, parse_dates=['date'] )
     data = data[data['status'] == 'Buy'].copy()
 
     return data
@@ -22,11 +23,10 @@ def main():
 
     # Title
     st.markdown('# Resultados de Negócio')
-    st.write('Nesta seção são mostrados os ganhos experados com a COMPRA e VENDA dos imóveis recomendados nesta análise de negócio, e com os conhecimentos extraídos na validação de hipóteses de negócio.')
 
     # ETL
     ## Extract
-    filepath = 'recommended_houses.csv'
+    filepath = 'data/recommended_houses.csv'
         
     data = get_data(filepath)
 
@@ -34,17 +34,16 @@ def main():
     #data = data_transform(data)
 
     ## Load
+    st.write(f'Nesta seção são mostrados os ganhos experados com a COMPRA e VENDA dos {data.shape[0]} imóveis recomendados nesta análise de negócio, e com os conhecimentos extraídos na validação de hipóteses de negócio.')
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, = st.columns(3)
 
-    # Preço de compra de todos os imóveis recomendados
-    c1.metric(label="Imóveis Recomendados", value=data.shape[0], delta="100% dos imóveis", delta_color="off")
     # Preço total de venda dos imóveis recomendados
-    c2.metric(label=f"Preço total de COMPRA dos {data.shape[0]} imóveis", value=f"${data['price'].sum():,.2f}")
+    c1.metric(label=f"Preço total de COMPRA dos {data.shape[0]} imóveis", value="USD $2,1B")
     # Lucro gerado na venda dos imóveis recomendados
-    c3.metric(label=f"Preço total da VENDA dos {data.shape[0]} imóveis", value=f"${data['Sell Price'].sum():,.2f}")
+    c2.metric(label=f"Preço total da VENDA dos {data.shape[0]} imóveis", value="USD $2,53B")
     # Lucro gerado na venda dos imóveis recomendados
-    c4.metric(label=f"Lucro total:", value=f"${data['Profit'].sum():,.2f}", delta=f"{data['Profit'].sum()/data['price'].sum()*100:.1f}%")
+    c3.metric(label=f"Lucro total:", value="USD $430M", delta=f"20.5%")
 
     st.subheader('100 melhores negócios')
     c1, c2 = st.columns(2)
@@ -56,7 +55,7 @@ def main():
             lon='long',
             color='price',
             size='Profit',
-            color_continuous_scale=px.colors.sequential.dense,
+            color_continuous_scale=px.colors.cyclical.IceFire,
             size_max=15,
             zoom=9.5 )
 
@@ -65,6 +64,23 @@ def main():
         st.plotly_chart(fig)
     with c2:
         st.dataframe(df, height=600)
+
+    st.subheader('Total de imóveis vendidos por dia e por sazonalidade')
+    df_2 = data.groupby(['date', 'season']).agg({'id': 'count'})
+    df_2 = df_2['2014-06-01':].reset_index()
+    fig2 = px.line(df_2, x='date', y='id', color='season', labels={
+        'id': 'Quantidade',
+        'date': 'Data',
+        'season': 'Estação do Ano'
+    })
+    fig2.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 0})
+    st.plotly_chart(fig2, use_container_width=True)
+
+    with st.sidebar:
+        st.markdown('# Sobre')
+        st.markdown('Construido por **Gustavo Barros**')
+        st.markdown('Se você quiser procurar por mais informações sobre este projeto ou entrar em contato comigo, consulte meu [Portfólio de Projetos](https://gustavobarros11.github.io/) ou [Github](https://github.com/GustavoBarros11).')
+        st.markdown('___')
 
 
 if __name__ == '__main__':

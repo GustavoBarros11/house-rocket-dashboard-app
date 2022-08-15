@@ -21,11 +21,12 @@ def main():
 
     # Title
     st.markdown('# Business Insights')
-    st.write('Nesta seção são levantadas hipóteses que podem ser úteis na tomada de decisão do CEO da empresa, ao analisar o portfólio de imóveis.')
+    st.write('Nesta seção foram levantadas hipóteses de negócio durante a análise dos dados do portfólio de imóveis da House Rocket,\
+         que posteriormente foram validadas ou invalidadas tornando-se em insights acionáveis para a tomada de decisão do CEO da empresa.')
 
     # ETL
     ## Extract
-    filepath = 'recommended_houses.csv'
+    filepath = 'data/recommended_houses.csv'
         
     data = get_data(filepath)
 
@@ -46,7 +47,7 @@ def main():
     fig_h1 = px.box(data, x="waterfront", y="price", labels={
         'price': 'Preço do imóvel (USD)',
         'waterfront': 'Vista para o Mar (0=Sem | 1=Com)'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941"], height=290 )
     fig_h1.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c1.plotly_chart(fig_h1, use_container_width=True)
     # Hyphotesis 02
@@ -56,7 +57,7 @@ def main():
     fig_h2 = px.pie(df_h2, values="price", names=["Old house (< 1955)", "New house (> 1955)"], labels={
         'price': 'Preço do imóvel (USD)',
         'new_price': 'Ano de Construção (0=< 1955 | 1=>= 1955)'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h2.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c2.plotly_chart(fig_h2, use_container_width=True)
 
@@ -67,7 +68,7 @@ def main():
         'price': 'Preço do imóvel (USD)',
         'count': 'Contagem',
         'has_basement': 'Tem Porão',
-    }, category_orders={'has_basement': ['Não', 'Sim']}, height=290 )
+    }, category_orders={'has_basement': ['Não', 'Sim']},color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h3.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c3.plotly_chart(fig_h3, use_container_width=True)
 
@@ -78,7 +79,7 @@ def main():
     fig_h4 = px.bar(df_h4, x="year", y="price", labels={
         'price': 'Preço médio dos imóveis (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h4.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c4.plotly_chart(fig_h4, use_container_width=True)
 
@@ -89,7 +90,7 @@ def main():
     fig_h5 = px.line(df_h5, x="month", y="price", labels={
         'price': 'Preço médio dos imóveis (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h5.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c5.plotly_chart(fig_h5, use_container_width=True)
 
@@ -100,7 +101,7 @@ def main():
     fig_h6 = px.bar(df_h6, x='bedrooms', y='price', labels={
         'price': 'Preço médio do imóvel (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h6.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c6.plotly_chart(fig_h6, use_container_width=True)
 
@@ -110,18 +111,18 @@ def main():
     fig_h7 = px.scatter(x=data["condition"].astype(int), y=data["price"], trendline="ols", labels={
         'price': 'Preço médio dos imóveis (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h7.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c7.plotly_chart(fig_h7, use_container_width=True)
 
     # Hyphotesis 08
     c8.subheader('H8) Imóveis em más condições mas COM vista para o mar, são em média 40% mais caros do que aqueles em mesmas condições mas SEM vista para o mar.')
-    c8.write(':white_check_mark: Válida: Imóveis reformados apresentam um valor superior em média, o que impactaria a tomada de decisão sobre comprar imóveis reformados ou comprar impoveis e reformá-los.')
+    c8.write(':x: Inválida: Imóveis reformados apresentam um valor superior em média, o que impactaria a tomada de decisão sobre comprar imóveis reformados ou comprar impoveis e reformá-los.')
     df_h8 = data.groupby(['waterfront', 'condition']).agg({'price':'mean'}).reset_index()
     fig_h8 = px.bar(df_h8, x='condition', y='price', color='waterfront', labels={
         'price': 'Preço médio do imóvel (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_continuous_scale=["#8d3941", "#a8adba"], height=290 )
     fig_h8.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c8.plotly_chart(fig_h8, use_container_width=True)
 
@@ -132,7 +133,7 @@ def main():
     fig_h9 = px.bar(df_h9, x="grade", y="price", labels={
         'price': 'Preço médio dos imóveis (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h9.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c9.plotly_chart(fig_h9, use_container_width=True)
 
@@ -143,12 +144,16 @@ def main():
     fig_h10 = px.line(df_h10, x='week', y='price', labels={
         'price': 'Preço médio do imóvel (USD)',
         'year': 'Ano'
-    }, height=290 )
+    }, color_discrete_sequence=["#8d3941", "#a8adba"], height=290 )
     fig_h8.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
     c10.plotly_chart(fig_h10, use_container_width=True)
 
     ### Sidebar
-    st.sidebar.write('This is the sidebar.')
+    with st.sidebar:
+        st.markdown('# Sobre')
+        st.markdown('Construido por **Gustavo Barros**')
+        st.markdown('Se você quiser procurar por mais informações sobre este projeto ou entrar em contato comigo, consulte meu [Portfólio de Projetos](https://gustavobarros11.github.io/) ou [Github](https://github.com/GustavoBarros11).')
+        st.markdown('___')
 
 if __name__ == '__main__':
     main()
