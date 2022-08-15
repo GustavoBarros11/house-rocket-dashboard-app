@@ -1,7 +1,3 @@
-from curses import use_default_colors
-from json import load
-from operator import index
-from turtle import color, onclick
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -180,6 +176,8 @@ def display_home_page(df, geofile):
         st.dataframe(data_category.drop(columns=['date']) \
             .rename(columns={'count':'contagem', 'unique': 'únicos'}).describe())
 
+    st.dataframe(df)
+
     price_density_maps(df, geofile)
 
     st.header( 'Relatórios de Negócio' )
@@ -258,7 +256,7 @@ def main():
     with st.sidebar:
         # Images used.
         sidebar_icon = Image.open('images/icon_dash.png')
-        st.sidebar.image(sidebar_icon, caption='House Rocket Real Estate Company')
+        st.sidebar.image(sidebar_icon, caption=f'{datetime.now().strftime("%B %d, %Y")}')
 
     # ETL
     ## Extract
@@ -283,29 +281,39 @@ def main():
 
     with st.sidebar:
         st.markdown('# Opções de Filtros:')
-        col1, col2 = st.columns(2)
-        col1.write('Filtered Houses:')
-        col2.markdown(f"<span style='color: #09ab3b; font-size: 16px;'>{data.shape[0]}</span>", unsafe_allow_html=True)
+        #col1, col2 = st.columns(2)
+        #col1.write('Filtered Houses:')
+        #col2.markdown(f"<span style='color: #09ab3b; font-size: 16px;'>{data.shape[0]}</span>", unsafe_allow_html=True)
 
         price_interval = st.slider('Intervalo de Preço', min_value=int(data['price'].min()), max_value=int(data['price'].max()), value=int(data['price'].max()))
 
-        st.multiselect('Filter by Region', options=data['zipcode'].unique())
-        st.multiselect('Filter by Season', options=data['season'].unique())
+        f_zipcode = st.multiselect('Filter by Region', options=data['zipcode'].unique())
+        f_season = st.multiselect('Filter by Season', options=data['season'].unique())
+
+        if f_zipcode != []:
+            data = data.loc[data['zipcode'].isin( f_zipcode ), :]
+        if f_season != []:
+            data = data.loc[data['season'].isin( f_season ), :]
 
         yr_built_interval = st.slider('Year Built', min_value=int(data['yr_built'].min()), max_value=int(data['yr_built'].max()), value=int(data['yr_built'].max()))
+        data = data.loc[data['yr_built'] <= yr_built_interval]
         
         # filters
         min_date = datetime.strptime( data['date'].min().strftime( '%Y-%m-%d' ), '%Y-%m-%d' )
         max_date = datetime.strptime( data['date'].max().strftime( '%Y-%m-%d' ), '%Y-%m-%d' )
 
         f_date = st.sidebar.slider( 'Date', min_date, max_date, max_date )
-        data['date'] = pd.to_datetime( data['date'] )
-        df_prices_day = data[data['date'] <= f_date]
-        df_prices_day = df_prices_day[['date', 'price']].groupby( 'date' ).mean().reset_index()
+        data = data[data['date'] <= f_date]
+        
 
-        st.checkbox('Only waterfront houses')
-        st.checkbox('Only renovated houses')
-        st.checkbox('Only  houses with basement')
+        if st.checkbox('Only waterfront houses'):
+            data = data.loc[data['waterfront'] == 1]
+        if st.checkbox('Only renovated houses'):
+            data = data.loc[data['yr_renovated'] > 0]
+        if st.checkbox('Only  houses with basement'):
+            data = data.loc[data['has_basement'] == 1]
+
+        st.markdown('___')
 
     # Criando Páginas do Dashboard
     display_home_page(data, geofile)
