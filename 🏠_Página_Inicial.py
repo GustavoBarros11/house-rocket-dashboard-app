@@ -1,11 +1,9 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
 import plotly.express as px
 import folium
 import geopandas
-import pydeck as pdk
 
 from datetime import datetime
 from folium.plugins import MarkerCluster
