@@ -243,7 +243,7 @@ def display_home_page(df, geofile):
             #excel = convert_df_excel(df_rep1)
             #json = convert_df_json(df_rep1)
 
-            st.download_button('Download .csv', data=csv, file_name='report1.csv', key=1)
+            st.download_button('Download .csv', data=csv, file_name='report1.csv', key=2)
             #st.download_button('Download .xlsx', data=excel, file_name='data.xlsx', key=2)
             #st.download_button('Download .json', data=json, file_name='data.json', key=3)
 
@@ -269,7 +269,7 @@ def display_home_page(df, geofile):
             #excel = convert_df_excel(df_rep1)
             #json = convert_df_json(df_rep1)
 
-            st.download_button('Download .csv', data=csv, file_name='report2.csv', key=1)
+            st.download_button('Download .csv', data=csv, file_name='report2.csv', key=3)
             #st.download_button('Download .xlsx', data=excel, file_name='data.xlsx', key=2)
             #st.download_button('Download .json', data=json, file_name='data.json', key=3) 
                 

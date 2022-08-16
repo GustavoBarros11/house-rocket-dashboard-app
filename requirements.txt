@@ -1,5 +1,5 @@
 pandas
-streamlit
+streamlit>=1.10.0
 numpy
 plotly
 folium
