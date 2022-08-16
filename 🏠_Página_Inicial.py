@@ -87,12 +87,12 @@ def price_density_maps( df, geofile ):
         + f"sqft, {row['bedrooms']} bedrooms, {row['bathrooms']}"
         + f" bathrooms, year built: {row['yr_built']}" ).add_to( marker_cluster )
     
-    m1.subheader( 'Portfolio Density' )
+    m1.subheader( 'Densidade por Região' )
     with m1:
         folium_static( density_map )
 
     # Region Price Map
-    m2.subheader( 'Price Density' )
+    m2.subheader( 'Densidade por Preço' )
 
     df_m2 = maps_df[['price', 'zipcode']].groupby( 'zipcode' ).mean().reset_index()
     df_m2.columns = ['ZIP', 'PRICE']
@@ -176,7 +176,24 @@ def display_home_page(df, geofile):
         st.dataframe(data_category.drop(columns=['date']) \
             .rename(columns={'count':'contagem', 'unique': 'únicos'}).describe())
 
-    st.dataframe(df)
+    with st.expander("Portfólio de imóveis da House Rocket", expanded=True):
+        st.write("""
+            Tabela com todos os dados dos IMÓVEIS FILTRADOS
+        """)
+        f_attributes = st.multiselect('Filtro de colunas:', options=df.columns.values)
+
+        c1, c2 = st.columns((5, 1))
+        
+        df_attr = df.copy()
+        if f_attributes != []:
+            df_attr = df_attr[f_attributes]
+        
+        c1.dataframe(df_attr)
+
+        with c2:
+            st.button('Download .csv', key=7, on_click=download_report(df_attr, 'csv', 1))
+            st.button('Download .xlsx', key=8, on_click=download_report(df_attr, 'xlsx', 1))
+            st.button('Download .json', key=9, on_click=download_report(df_attr, 'json', 1))
 
     price_density_maps(df, geofile)
 
@@ -197,9 +214,9 @@ def display_home_page(df, geofile):
 
         with c2:
             # data plot
-            fig = px.bar(df_rep1_2[:10], x='zipcode', y='profit', title='Avg. Profit x Region', color_discrete_sequence=["#8d3941"], labels={
-                'profit': 'Avg. Profit (USD)',
-                'zipcode': 'Region'
+            fig = px.bar(df_rep1_2[:10], x='zipcode', y='profit', title='Lucro Médio x Região', color_discrete_sequence=["#8d3941"], labels={
+                'profit': 'Lucro médio (USD)',
+                'zipcode': 'Região'
             }, height=400 )
             fig.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
             st.plotly_chart( fig, use_container_width=True )
@@ -219,9 +236,9 @@ def display_home_page(df, geofile):
 
         with c2:
             # data plot
-            fig = px.bar(df_rep2, x='season', y='Buy Price', title='Avg. Buy Price x Season', color_discrete_sequence=["#8d3941"], labels={
-                'y': 'Avg. Buy Price (USD)',
-                'x': 'Season'
+            fig = px.bar(df_rep2, x='season', y='Buy Price', title='Preço médio de COMPRA x Estação do Ano', color_discrete_sequence=["#8d3941"], labels={
+                'y': 'Preço médio de COMPRA (USD)',
+                'x': 'Estação do ano'
             }, height=400 )
             fig.update_layout(margin={"b": 0, "l": 0, "r": 0, "t": 40})
             st.plotly_chart( fig, use_container_width=True )
@@ -246,12 +263,11 @@ def download_report(df, type, report):
         
 
 def main():
-    st.set_page_config(layout='wide', page_title='Dashboard de Insights da House Rocket', page_icon=':thumbsup:')
+    st.set_page_config(layout='wide', page_title='Página Inicial | Dashboard de Insights da House Rocket', page_icon=':house:')
 
     header_img = Image.open("images/header_v2_rounded.png")
 
     st.image(header_img, use_column_width=True)
-    #st.markdown("<h3 style='text-align: left; color: #5c3934;'><i>Dashboard de Insights da House Rocket</i></h3><hr>", unsafe_allow_html=True)
 
     with st.sidebar:
         # Images used.

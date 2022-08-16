@@ -15,7 +15,7 @@ def get_data( filepath ):
     return data
 
 def main():
-    st.set_page_config(layout='wide', page_title='Dashboard de Insights da House Rocket', page_icon=':thumbsup:')
+    st.set_page_config(layout='wide', page_title='Resultados de Negócio | Dashboard de Insights da House Rocket', page_icon=':dollar:')
 
     header_img = Image.open("images/header_v2_rounded.png")
 
