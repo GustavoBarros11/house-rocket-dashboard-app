@@ -5,5 +5,4 @@ plotly
 folium
 streamlit_folium
 geopandas
-PIL
 statsmodels
