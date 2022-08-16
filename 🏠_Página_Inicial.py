@@ -46,6 +46,21 @@ def get_geofile( url ):
     except:
         return None
 
+@st.cache
+def convert_df_csv(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv()
+
+@st.cache
+def convert_df_excel(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_excel('data.xlsx')
+
+@st.cache
+def convert_df_json(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_json()
+
 def plot_distribution_of_variable(df, col):
     # data plot
     fig = px.histogram( df, x=col, title='Qtd. de Imóveis por Faixa de Preço', color_discrete_sequence=["#8d3941"], labels={
@@ -191,9 +206,13 @@ def display_home_page(df, geofile):
         c1.dataframe(df_attr)
 
         with c2:
-            st.button('Download .csv', key=7, on_click=download_report(df_attr, 'csv', 1))
-            st.button('Download .xlsx', key=8, on_click=download_report(df_attr, 'xlsx', 1))
-            st.button('Download .json', key=9, on_click=download_report(df_attr, 'json', 1))
+            csv = convert_df_csv(df_attr)
+            #excel = convert_df_excel(df_attr)
+            #json = convert_df_json(df_attr)
+
+            st.download_button('Download .csv', data=csv, file_name='data.csv', key=1)
+            #st.download_button('Download .xlsx', data=excel, file_name='data.xlsx', key=2)
+            #st.download_button('Download .json', data=json, file_name='data.json', key=3)
 
     price_density_maps(df, geofile)
 
@@ -222,9 +241,13 @@ def display_home_page(df, geofile):
             st.plotly_chart( fig, use_container_width=True )
 
         with c3:
-            st.button('Download .csv', key=1, on_click=download_report(df_rep1, 'csv', 1))
-            st.button('Download .xlsx', key=2, on_click=download_report(df_rep1, 'xlsx', 1))
-            st.button('Download .json', key=3, on_click=download_report(df_rep1, 'json', 1))
+            csv = convert_df_csv(df_rep1)
+            #excel = convert_df_excel(df_rep1)
+            #json = convert_df_json(df_rep1)
+
+            st.download_button('Download .csv', data=csv, file_name='report1.csv', key=1)
+            #st.download_button('Download .xlsx', data=excel, file_name='data.xlsx', key=2)
+            #st.download_button('Download .json', data=json, file_name='data.json', key=3)
 
     with tab2:
         df_rep2 = pd.read_csv('data/report2.csv', index_col=0)
@@ -244,23 +267,16 @@ def display_home_page(df, geofile):
             st.plotly_chart( fig, use_container_width=True )
         
         with c3:
-            st.button('Download .csv', key=4, on_click=download_report(df_rep2, 'csv', 2))
-            st.button('Download .xlsx', key=5, on_click=download_report(df_rep2, 'xlsx', 2))
-            st.button('Download .json', key=6, on_click=download_report(df_rep2, 'json', 2))
+            csv = convert_df_csv(df_rep2)
+            #excel = convert_df_excel(df_rep1)
+            #json = convert_df_json(df_rep1)
+
+            st.download_button('Download .csv', data=csv, file_name='report2.csv', key=1)
+            #st.download_button('Download .xlsx', data=excel, file_name='data.xlsx', key=2)
+            #st.download_button('Download .json', data=json, file_name='data.json', key=3) 
                 
 
     return None
-
-def download_report(df, type, report):
-    if type == 'csv':
-        df.to_csv(f'report{report}.csv')
-    elif type == 'xlsx':
-        df.to_pickle(f'report{report}.xlsx')
-    elif type == 'json':
-        df.to_pickle(f'report{report}.xlsx')
-
-    return False
-        
 
 def main():
     st.set_page_config(layout='wide', page_title='Página Inicial | Dashboard de Insights da House Rocket', page_icon=':house:')
@@ -297,9 +313,6 @@ def main():
 
     with st.sidebar:
         st.markdown('# Opções de Filtros:')
-        #col1, col2 = st.columns(2)
-        #col1.write('Filtered Houses:')
-        #col2.markdown(f"<span style='color: #09ab3b; font-size: 16px;'>{data.shape[0]}</span>", unsafe_allow_html=True)
 
         price_interval = st.slider('Intervalo de Preço', min_value=int(data['price'].min()), max_value=int(data['price'].max()), value=int(data['price'].max()))
 
